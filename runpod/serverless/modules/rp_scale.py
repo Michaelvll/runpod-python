@@ -3,6 +3,7 @@ runpod | serverless | rp_scale.py
 Provides the functionality for scaling the runpod serverless worker.
 '''
 
+import os
 import asyncio
 import typing
 
@@ -12,6 +13,7 @@ from .worker_state import Jobs
 
 log = RunPodLogger()
 job_list = Jobs()
+
 
 class JobScaler():
     """
@@ -54,12 +56,12 @@ class JobScaler():
     """
 
     # Scaling Constants
-    CONCURRENCY_SCALE_FACTOR = 2
-    AVAILABILITY_RATIO_THRESHOLD = 0.90
-    INITIAL_CONCURRENT_REQUESTS = 1
-    MAX_CONCURRENT_REQUESTS = 100
-    MIN_CONCURRENT_REQUESTS = 1
-    SLEEP_INTERVAL_SEC = 1
+    CONCURRENCY_SCALE_FACTOR = os.environ.get("CONCURRENCY_SCALE_FACTOR", 2)
+    AVAILABILITY_RATIO_THRESHOLD = os.environ.get("AVAILABILITY_RATIO_THRESHOLD", 0.90)
+    INITIAL_CONCURRENT_REQUESTS = os.environ.get("INITIAL_CONCURRENT_REQUESTS", 1)
+    MAX_CONCURRENT_REQUESTS = os.environ.get("MAX_CONCURRENT_REQUESTS", 100)
+    MIN_CONCURRENT_REQUESTS = os.environ.get("MIN_CONCURRENT_REQUESTS", 1)
+    SLEEP_INTERVAL_SEC = os.environ.get("SLEEP_INTERVAL_SEC", 1)
 
     def __init__(self, concurrency_controller: typing.Any):
         self.background_get_job_tasks = set()
@@ -148,8 +150,6 @@ class JobScaler():
                 f"{self.num_concurrent_get_job_requests}."
                 f" Parallel processing = {use_parallel_processing}"
             )
-
-
 
     def upscale_rate(self) -> None:
         """
